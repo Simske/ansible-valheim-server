@@ -1,0 +1,16 @@
+---
+- name: Prepare ansible user
+  hosts: all
+  become: true
+  tasks:
+    - name: Create ansible user
+      user:
+        name: ansible
+        shell: /bin/bash
+
+    - name: Ansible user passwordless sudo
+      lineinfile:
+        path: /etc/sudoers.d/0-ansible
+        create: true
+        line: ansible ALL=(ALL) NOPASSWD:ALL
+        regexp: ^ansible

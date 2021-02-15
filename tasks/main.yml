@@ -1,0 +1,128 @@
+---
+- name: Create valheim user
+  user:
+    name: valheim
+  become: True
+  register: valheim_user
+
+- name: Install steamcmd prerequisites
+  apt:
+    name: lib32gcc1
+    cache_valid_time: 3600
+
+- name: Create steamcmd directory
+  file:
+    path: "{{ valheim_user.home }}/steamcmd"
+    state: directory
+    owner: valheim
+    group: valheim
+
+- name: Download steamcmd
+  unarchive:
+    src: https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz
+    dest: "{{ valheim_user.home }}/steamcmd"
+    creates: "{{ valheim_user.home }}/steamcmd/steamcmd.sh"
+    remote_src: True
+  become_user: valheim
+  become: True
+
+- name: Install Valheim update script
+  template:
+    src: update.sh.j2
+    dest: "{{ valheim_user.home }}/update.sh"
+    owner: valheim
+    group: valheim
+    mode: 0700
+  register: valheim_update
+  become: True
+
+- name: Install/update valheim dedicated server
+  command:
+    cmd: "{{ valheim_update.dest }}"
+  register: valheim_update_output
+  changed_when: "'Update state (0x61) downloading' in valheim_update_output.stdout"
+  become: True
+  become_user: valheim
+  notify: Restart Valheim server
+
+- name: Install server start script
+  template:
+    src: start-server.sh.j2
+    dest: ~valheim/start-server.sh
+    owner: valheim
+    group: valheim
+    mode: 0700
+  register: valheim_server_script
+  become: True
+  notify: Restart Valheim server
+
+- name: Install systemd unit file for Valheim
+  template:
+    src: valheim.service.j2
+    dest: /etc/systemd/system/valheim.service
+  become: True
+  register: valheim_systemd
+
+- name: Validate systemd unit file
+  # validation using template module is not possible,
+  # because temporaryfilename doesn't adhere to unitname.service
+  command:
+    cmd: systemd-analyze verify /etc/systemd/system/valheim.service
+  register: valheim_systemd_validate
+  changed_when: false
+
+- name: Enable Valheim systemd service (but don't start)
+  systemd:
+    name: valheim
+    enabled: "{{ valheim_server_enabled }}"
+    daemon_reload: "{{ valheim_systemd.changed }}"
+  become: True
+
+- name: Create saves directory
+  file:
+    path: "{{ valheim_server_savedir }}"
+    state: directory
+    owner: valheim
+    group: valheim
+  become: True
+
+- name: Set Valheim server admins
+  copy:
+    dest: "{{ valheim_server_savedir }}/adminlist.txt"
+    content: "{{ valheim_admins | join('\n') }}"
+    owner: valheim
+    group: valheim
+  become: True
+  notify: Restart Valheim server
+
+- name: Set Valheim permitlist
+  copy:
+    dest: "{{ valheim_server_savedir }}/permittedlist.txt"
+    content: "{{ valheim_permitlist | join('\n') }}"
+    owner: valheim
+    group: valheim
+  become: True
+  notify: Restart Valheim server
+
+- name: Unban players
+  lineinfile:
+    path: "{{ valheim_server_savedir }}/bannedlist.txt"
+    line: "{{ item }}"
+    owner: valheim
+    group: valheim
+    create: true
+    state: absent
+  with_items: "{{ valheim_unban }}"
+  become: True
+  notify: Restart Valheim server
+
+- name: Ban players
+  lineinfile:
+    path: "{{ valheim_server_savedir }}/bannedlist.txt"
+    line: "{{ item }}"
+    owner: valheim
+    group: valheim
+    create: true
+  with_items: "{{ valheim_ban }}"
+  become: True
+  notify: Restart Valheim server

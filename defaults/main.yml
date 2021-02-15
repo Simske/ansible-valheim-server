@@ -1,0 +1,14 @@
+---
+valheim_server_dir: ~valheim/server
+valheim_server_app_id: 896660
+valheim_server_name: vinlandia
+valheim_server_port: 2456
+valheim_server_world: vinlandia
+valheim_server_password: testpass
+valheim_server_savedir: ~valheim/saves
+valheim_admins: []
+valheim_permitlist: []
+valheim_ban: []
+valheim_unban: []
+valheim_server_enabled: false
+valheim_server_started: false

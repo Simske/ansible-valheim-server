@@ -1,0 +1,6 @@
+---
+- name: Restart Valheim server
+  service:
+    name: valheim
+    state: restarted
+  when: "{{ valheim_server_started }}"

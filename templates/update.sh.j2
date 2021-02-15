@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+{{ valheim_user.home }}/steamcmd/steamcmd.sh +login anonymous \
+    +force_install_dir {{ valheim_server_dir }} \
+    +app_update {{ valheim_server_app_id }} validate \
+    +quit

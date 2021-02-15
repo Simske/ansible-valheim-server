@@ -1,0 +1,16 @@
+[Unit]
+Description=Valheim Dedicated Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStartPre={{ valheim_update.dest }}
+ExecStart={{ valheim_server_script.dest }}
+WorkingDirectory={{ valheim_user.home }}
+Restart=always
+RestartSec=30
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
