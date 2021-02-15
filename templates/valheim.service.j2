@@ -8,9 +8,13 @@ Type=simple
 ExecStartPre={{ valheim_update.dest }}
 ExecStart={{ valheim_server_script.dest }}
 WorkingDirectory={{ valheim_user.home }}
-Restart=always
-RestartSec=30
-KillMode=mixed
+Environment="HOME={{ valheim_user.home }}"
+User=valheim
+Group=valheim
+Restart=on-failure
+RestartSec=10
+TimeoutSec=60
+KillSignal=SIGINT
 
 [Install]
 WantedBy=multi-user.target

@@ -71,11 +71,16 @@
   register: valheim_systemd_validate
   changed_when: false
 
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: True
+  become: True
+  when: valheim_systemd.changed
+
 - name: Enable Valheim systemd service (but don't start)
   systemd:
     name: valheim
     enabled: "{{ valheim_server_enabled }}"
-    daemon_reload: "{{ valheim_systemd.changed }}"
   become: True
 
 - name: Create saves directory

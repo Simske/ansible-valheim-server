@@ -3,4 +3,4 @@
   service:
     name: valheim
     state: restarted
-  when: "{{ valheim_server_started }}"
+  when: valheim_server_started
