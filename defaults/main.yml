@@ -10,5 +10,7 @@ valheim_admins: []
 valheim_permitlist: []
 valheim_ban: []
 valheim_unban: []
-valheim_server_enabled: false
-valheim_server_started: false
+valheim_server_enabled: True
+valheim_server_started: True
+valheim_autorestart: True
+valheim_autorestart_hour: "5"

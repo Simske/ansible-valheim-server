@@ -131,3 +131,13 @@
   with_items: "{{ valheim_ban }}"
   become: True
   notify: Restart Valheim server
+
+- name: Set restart/update cronjob
+  cron:
+    name: Restart valheim server daily
+    hour: "{{ valheim_autorestart_hour }}"
+    minute: "0"
+    user: root
+    job: systemctl restart valheim
+    state: "{{ 'present' if valheim_autorestart else 'absent' }}"
+  become: True
